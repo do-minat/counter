@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Керування балансом</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0e1117;
+    color: #e6e8eb;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 24px;
+  }
+
+  /* Current balance display */
+  .current-balance {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .current-balance .label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .current-balance .value {
+    font-size: 56px;
+    font-weight: 900;
+    color: #4ecca3;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(78,204,163,0.3);
+  }
+
+  .current-balance .currency {
+    font-size: 32px;
+    opacity: 0.7;
+  }
+
+  /* Quick buttons grid */
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 24px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 16px 8px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+
+  .btn-plus {
+    background: #1a3a2e;
+    color: #4ecca3;
+    border: 1px solid rgba(78,204,163,0.2);
+  }
+  .btn-plus:active { background: #24503e; box-shadow: 0 0 20px rgba(78,204,163,0.2); }
+
+  .btn-minus {
+    background: #3a1a1a;
+    color: #ff6b6b;
+    border: 1px solid rgba(255,107,107,0.2);
+  }
+  .btn-minus:active { background: #502424; box-shadow: 0 0 20px rgba(255,107,107,0.2); }
+
+  /* Custom amount */
+  .custom-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 24px;
+  }
+
+  .custom-input {
+    flex: 1;
+    background: #1a1d25;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 14px 16px;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .custom-input::-webkit-inner-spin-button,
+  .custom-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .custom-input:focus { border-color: rgba(78,204,163,0.4); }
+
+  .custom-btn {
+    width: 60px;
+    font-size: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Set exact */
+  .set-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 380px;
+    margin-bottom: 24px;
+  }
+
+  .set-input {
+    flex: 1;
+    background: #1a1d25;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 14px 16px;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .set-input::-webkit-inner-spin-button,
+  .set-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .set-input:focus { border-color: rgba(255,190,60,0.4); }
+
+  .btn-set {
+    background: #2a2518;
+    color: #ffbe3c;
+    border: 1px solid rgba(255,190,60,0.2);
+    padding: 14px 20px;
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .btn-set:active { background: #3d3520; }
+
+  /* Reset */
+  .btn-reset {
+    background: transparent;
+    color: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.08);
+    width: 100%;
+    max-width: 380px;
+    padding: 14px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  .btn-reset:active { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+
+  /* History log */
+  .history {
+    width: 100%;
+    max-width: 380px;
+    margin-top: 32px;
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+  }
+
+  .history-item .time {
+    color: rgba(255,255,255,0.25);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .history-item .change.positive { color: #4ecca3; }
+  .history-item .change.negative { color: #ff6b6b; }
+  .history-item .change.set { color: #ffbe3c; }
+
+  .status {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 20px;
+  }
+  .status.connected { color: #4ecca3; }
+  .status.error { color: #ff6b6b; }
+
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirm-overlay.show { display: flex; }
+
+  .confirm-box {
+    background: #1a1d25;
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    max-width: 300px;
+  }
+  .confirm-box p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+  }
+  .confirm-box .confirm-buttons {
+    display: flex;
+    gap: 12px;
+  }
+  .confirm-box .btn { flex: 1; padding: 12px; font-size: 14px; }
+  .btn-confirm-yes {
+    background: #3a1a1a;
+    color: #ff6b6b;
+    border: 1px solid rgba(255,107,107,0.3);
+  }
+  .btn-confirm-no {
+    background: #1a2a22;
+    color: #4ecca3;
+    border: 1px solid rgba(78,204,163,0.2);
+  }
+</style>
+</head>
+<body>
+
+<h1>Керування балансом</h1>
+
+<div class="status" id="status">З'ЄДНАННЯ...</div>
+
+<div class="current-balance">
+  <div class="label">Зараз на екрані</div>
+  <div class="value">
+    <span class="currency" id="currencySign">₴</span><span id="currentValue">0</span>
+  </div>
+</div>
+
+<div class="section-title">Швидко додати</div>
+<div class="quick-grid" id="plusGrid">
+  <button class="btn btn-plus" onclick="adjust(50)">+50</button>
+  <button class="btn btn-plus" onclick="adjust(100)">+100</button>
+  <button class="btn btn-plus" onclick="adjust(200)">+200</button>
+  <button class="btn btn-plus" onclick="adjust(500)">+500</button>
+  <button class="btn btn-plus" onclick="adjust(1000)">+1000</button>
+  <button class="btn btn-plus" onclick="adjust(5000)">+5000</button>
+</div>
+
+<div class="section-title">Швидко відняти</div>
+<div class="quick-grid" id="minusGrid">
+  <button class="btn btn-minus" onclick="adjust(-50)">−50</button>
+  <button class="btn btn-minus" onclick="adjust(-100)">−100</button>
+  <button class="btn btn-minus" onclick="adjust(-200)">−200</button>
+  <button class="btn btn-minus" onclick="adjust(-500)">−500</button>
+  <button class="btn btn-minus" onclick="adjust(-1000)">−1000</button>
+  <button class="btn btn-minus" onclick="adjust(-5000)">−5000</button>
+</div>
+
+<div class="section-title">Своя сума</div>
+<div class="custom-row">
+  <button class="btn btn-minus custom-btn" onclick="adjustCustom(-1)">−</button>
+  <input type="number" class="custom-input" id="customAmount" placeholder="0" value="">
+  <button class="btn btn-plus custom-btn" onclick="adjustCustom(1)">+</button>
+</div>
+
+<div class="section-title">Встановити точну суму</div>
+<div class="set-row">
+  <input type="number" class="set-input" id="setAmount" placeholder="Сума">
+  <button class="btn btn-set" onclick="setExact()">ЗАДАТИ</button>
+</div>
+
+<button class="btn btn-reset" onclick="confirmReset()">Скинути до 0</button>
+
+<div class="history" id="history">
+  <div class="section-title">Останні зміни</div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p>Скинути баланс до 0?</p>
+    <div class="confirm-buttons">
+      <button class="btn btn-confirm-no" onclick="closeConfirm()">Ні</button>
+      <button class="btn btn-confirm-yes" onclick="doReset()">Так, скинути</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+  // =============================================
+  //  ВСТАВ СВІЙ FIREBASE CONFIG НИЖЧЕ
+  //  (той самий що і в display.html)
+  // =============================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBkxd9zfgFBO_hworWbgJQX215QPO7cjAA",
+    authDomain: "babki-4e447.firebaseapp.com",
+    databaseURL: "https://babki-4e447-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "babki-4e447",
+    storageBucket: "babki-4e447.firebasestorage.app",
+    messagingSenderId: "873612877270",
+    appId: "1:873612877270:web:55c8125ecc6a65b5e89877"
+  };
+  // =============================================
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get('room') || 'default';
+
+  const balanceRef = ref(db, `counters/${roomId}/balance`);
+  const statusEl = document.getElementById('status');
+  const currentValueEl = document.getElementById('currentValue');
+
+  let currentBalance = 0;
+  const historyLog = [];
+
+  // Listen for changes
+  onValue(balanceRef, (snapshot) => {
+    statusEl.textContent = 'ПІДКЛЮЧЕНО';
+    statusEl.className = 'status connected';
+
+    currentBalance = snapshot.val() ?? 0;
+    currentValueEl.textContent = formatNumber(currentBalance);
+  }, (error) => {
+    statusEl.textContent = 'ПОМИЛКА: ' + error.message;
+    statusEl.className = 'status error';
+  });
+
+  // Global functions
+  window.adjust = async function(amount) {
+    const newVal = currentBalance + amount;
+    await set(balanceRef, newVal);
+    addHistory(amount > 0 ? `+${amount}` : `${amount}`, amount > 0 ? 'positive' : 'negative', newVal);
+  };
+
+  window.adjustCustom = async function(sign) {
+    const input = document.getElementById('customAmount');
+    const val = parseInt(input.value);
+    if (!val || val <= 0) return;
+    const amount = val * sign;
+    const newVal = currentBalance + amount;
+    await set(balanceRef, newVal);
+    addHistory(amount > 0 ? `+${amount}` : `${amount}`, amount > 0 ? 'positive' : 'negative', newVal);
+    input.value = '';
+  };
+
+  window.setExact = async function() {
+    const input = document.getElementById('setAmount');
+    const val = parseInt(input.value);
+    if (isNaN(val)) return;
+    await set(balanceRef, val);
+    addHistory(`= ${formatNumber(val)}`, 'set', val);
+    input.value = '';
+  };
+
+  window.confirmReset = function() {
+    document.getElementById('confirmOverlay').classList.add('show');
+  };
+
+  window.closeConfirm = function() {
+    document.getElementById('confirmOverlay').classList.remove('show');
+  };
+
+  window.doReset = async function() {
+    await set(balanceRef, 0);
+    addHistory('Скинуто до 0', 'negative', 0);
+    closeConfirm();
+  };
+
+  function addHistory(changeText, type, resultBalance) {
+    const now = new Date();
+    const time = now.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const historyEl = document.getElementById('history');
+
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `
+      <span class="change ${type}">${changeText}</span>
+      <span style="color:rgba(255,255,255,0.5)">→ ${formatNumber(resultBalance)}</span>
+      <span class="time">${time}</span>
+    `;
+
+    // Insert after the title
+    const title = historyEl.querySelector('.section-title');
+    if (title.nextSibling) {
+      historyEl.insertBefore(item, title.nextSibling);
+    } else {
+      historyEl.appendChild(item);
+    }
+
+    // Keep max 20 entries
+    const items = historyEl.querySelectorAll('.history-item');
+    if (items.length > 20) items[items.length - 1].remove();
+  }
+
+  function formatNumber(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+</script>
+</body>
+</html>
